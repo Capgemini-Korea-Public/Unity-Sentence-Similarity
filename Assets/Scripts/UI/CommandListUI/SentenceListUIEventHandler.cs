@@ -3,17 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class SentenceListUI : MonoBehaviour
+public class SentenceListUIEventHandler : BaseScrollViewUI
 {
-    [Header("# Sentence List UI Components")]
-    [SerializeField] private RectTransform sentenceContentRect;
-
-    [Header("# Sentence Prefab")]
-    [SerializeField] private GameObject sentencePrefab;
-    
-    [Header("# Sentence Similarity Plugin")]
-    [SerializeField] private SentenceSimilarity sentenceSimilarity;
-
     [Header("# Sentence Information")]
     [SerializeField] private int currentSentenceIndex;
     private Queue<SentenceInfo> deactiveSentenceUIQueue = new Queue<SentenceInfo>();

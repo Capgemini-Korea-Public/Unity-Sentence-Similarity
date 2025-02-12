@@ -12,7 +12,7 @@ public class SentenceInfo : MonoBehaviour
     [SerializeField] private Button deleteButton;
     [SerializeField] private TMP_Text commandText;
     
-    private SentenceListUI sentenceListUI;
+    private SentenceListUIEventHandler sentenceListUIEventHandler;
     private void Awake()
     {
         deleteButton.onClick.AddListener(DeleteCommand);
@@ -20,12 +20,12 @@ public class SentenceInfo : MonoBehaviour
 
     private void DeleteCommand()
     {
-        sentenceListUI.DeleteSentence(this);
+        sentenceListUIEventHandler.DeleteSentence(this);
     }
 
-    public void SentenceInfoInit(SentenceListUI sentenceListUI)
+    public void SentenceInfoInit(SentenceListUIEventHandler sentenceListUIEventHandler)
     {
-        this.sentenceListUI = sentenceListUI; 
+        this.sentenceListUIEventHandler = sentenceListUIEventHandler; 
     }
     
     public void ActiveCommandUI(string sentence)
