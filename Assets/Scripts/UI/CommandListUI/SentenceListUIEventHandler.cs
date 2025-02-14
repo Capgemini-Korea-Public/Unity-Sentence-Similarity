@@ -11,7 +11,7 @@ public class SentenceListUIEventHandler : BaseScrollViewUI
 
     private void Start()
     {
-        sentenceSimilarity.sentenceRegisterSuccessEvent.AddListener(RegisterSentence);
+        sentenceSimilarityAPI.sentenceRegisterSuccessEvent.AddListener(RegisterSentence);
     }
     
     private void RegisterSentence(string sentence)
@@ -27,7 +27,7 @@ public class SentenceListUIEventHandler : BaseScrollViewUI
         sentenceInfo.gameObject.SetActive(false);
         currentSentenceIndex--;
         deactiveSentenceUIQueue.Enqueue(sentenceInfo);
-        sentenceSimilarity.DeleteSentence(sentenceInfo.Sentence);
+        sentenceSimilarityAPI.DeleteSentence(sentenceInfo.Sentence);
     }
 
     private SentenceInfo GetSentenceUI()

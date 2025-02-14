@@ -1,13 +1,14 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class RegisterButtonEventHandler : MonoBehaviour
 {
     public InputFieldEventHandler inputFieldEventHandler;
-    [SerializeField] private SentenceSimilarity sentenceSimilarity; 
+    [FormerlySerializedAs("sentenceSimilarity")] [SerializeField] private SentenceSimilarity_API sentenceSimilarityAPI; 
     
     public void OnClickEvent()
     {
-        sentenceSimilarity.RegisterSentence(inputFieldEventHandler.GetInputSentence());
+        sentenceSimilarityAPI.RegisterSentence(inputFieldEventHandler.GetInputSentence());
     }
 
 }

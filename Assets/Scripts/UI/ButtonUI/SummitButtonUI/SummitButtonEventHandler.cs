@@ -1,13 +1,14 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class SummitButtonEventHandler : MonoBehaviour
 {
 
     public InputFieldEventHandler inputFieldEventHandler;
-    [SerializeField] private SentenceSimilarity sentenceSimilarity; 
+    [FormerlySerializedAs("sentenceSimilarity")] [SerializeField] private SentenceSimilarity_API sentenceSimilarityAPI; 
     public void OnClickEvent()
     {
-        sentenceSimilarity.DetectSentences(inputFieldEventHandler.GetInputSentence());
+        sentenceSimilarityAPI.DetectSentences(inputFieldEventHandler.GetInputSentence());
     }
 
 }
