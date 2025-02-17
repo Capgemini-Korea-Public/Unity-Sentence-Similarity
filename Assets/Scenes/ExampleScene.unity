@@ -1433,8 +1433,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 203743f93f6a10944b30a1c5d9659cea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sentenceSimilarityModel: {fileID: 5022602860645237092, guid: d53660cbdf58df8479cac84cff1fdeb7, type: 3}
-  vocapAsset: {fileID: 4900000, guid: da7fdd8c2f497cb4c85664c23b07d0f0, type: 3}
+  sentenceSimilarityModel: {fileID: 5022602860645237092, guid: efa43557f7219104aa7c2651fcacdad9, type: 3}
+  vocapAsset: {fileID: 4900000, guid: 77ba513ee89d822459ac04ae8beec434, type: 3}
+  tokens: []
+  tokens1: 
+  tokens2: 
 --- !u!4 &853177044
 Transform:
   m_ObjectHideFlags: 0
