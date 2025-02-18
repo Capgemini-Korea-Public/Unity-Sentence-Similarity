@@ -88,7 +88,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         Model model = graph.Compile(C);
 
         // 9. Worker 생성 및 동기 실행
-        Worker worker = new Worker(model, GetBackendType());
+        using Worker worker = new Worker(model, GetBackendType());
         worker.Schedule(); // Schedule() → Execute()로 수정
 
         // 10. 결과 추출
@@ -96,8 +96,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         result.CompleteAllPendingOperations();
         
         poolingWorker.Dispose();
-        worker.Dispose();
-        
+   
         return result[0];
     }
     
