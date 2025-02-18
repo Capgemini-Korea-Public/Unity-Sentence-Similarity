@@ -1,62 +1,120 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.Collections;
+using HuggingFace.API;
 using Unity.Sentis;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
-using UnityEngine.Windows;
-using File = System.IO.File;
 
-public class SentenceSimilarity_Sentis : MonoBehaviour
+public class SentenceSimilarity : MonoBehaviour
 {
-    [Header("# Play Model")]
-    public ModelAsset sentenceSimilarityModel;
-    public TextAsset vocapAsset;
+    [Header(" Model Information")]
+    [SerializeField] private ActivateType activateType;
+
+    [Header("# Base Information")]
+    [SerializeField] private List<string> sentenceList;
+    [SerializeField] private int maxSentenceCount = 100;
+    [SerializeField] private string enteredSentence;
+    public List<string> SentenceList => sentenceList;
+    public int SentenceCount => sentenceList.Count;
+    public string EnteredSentence => enteredSentence;
+
+    [Header("# Sentis Information")]
+    [SerializeField] private ModelAsset sentenceSimilarityModel;
+    [SerializeField] private TextAsset vocapAsset;
+
+    [Header("Detection Events")]
+    [SerializeField] public UnityEvent OnMeasureBeginEvent;
+    [SerializeField] public UnityEvent<SimilarityResult[]> OnMeasureSuccessEvent;
+    [SerializeField] public UnityEvent OnMeasureFailEvent;
+
+    [Header("Sentence Events")]
+    [SerializeField] public UnityEvent<string> OnSentenceRegisterSuccessEvent;
+    [SerializeField] public UnityEvent OnSentenceRegisterFailEvent;
+    [SerializeField] public UnityEvent OnSentenceDeleteEvent;
+
+
+    public void MeasureSentenceAccuracy(string sentence)
+    {
+        if (sentenceList.Count == 0 || sentence == "")
+        {
+            OnMeasureFailEvent?.Invoke();
+            Debug.LogWarning("No sentences to detect.");
+            return;
+        }
+        
+        if (activateType == ActivateType.HuggingFaceAPI)
+            ExecuteModelFromHuggingFaceAPI(sentence);
+        else
+            ExecuteModelFromSentis(sentence);
+    }
+
+    // Sentence Similarity Model Run from HuggingFaceAPI
+    #region HuggingFaceAPI
+
+    private void ExecuteModelFromHuggingFaceAPI(string sentence)
+    {
+        OnMeasureBeginEvent?.Invoke();
+        enteredSentence = sentence;
+        HuggingFaceAPI.SentenceSimilarity(enteredSentence, MeasureSuccess, MeasureFailure, sentenceList.ToArray());
+    }
+
+  #endregion
+
+    // Sentence Similarity Model Run from Sentis
+    #region Sentis
 
     private Worker modelExecuteWorker;
     private Worker scoreOpsWorker;
     private Worker poolingWorker;
 
-    string string1 = "That is a happy person"; // similarity = 1
+    private string[] vocabTokens;
+    private List<int> tokens1;
+    private List<int> tokens2;
 
-    //Choose a string to comapre string1  to:
-    string string2 = "That is a happy person"; // similarity = 0.695
+    private const int START_TOKEN = 101;
+    private const int END_TOKEN = 102;
 
-    //Special tokens
-    const int START_TOKEN = 101;
-    const int END_TOKEN = 102;
-
-    public string[] tokens;
-
-    public List<int> tokens1;
-    public List<int> tokens2;
-
-    private async void Start()
+    private async void ExecuteModelFromSentis(string sentence)
     {
-        SplitVocabText();
+        try
+        {
+            enteredSentence = sentence;
+            OnMeasureBeginEvent?.Invoke();
+            
+            if (vocabTokens == null)
+                SplitVocabTokens();
 
-        var model = ModelLoader.Load(sentenceSimilarityModel);
-        modelExecuteWorker = new Worker(model, GetBackendType());
+            var model = ModelLoader.Load(sentenceSimilarityModel);
+            modelExecuteWorker = new Worker(model, GetBackendType());
 
-        tokens1 = GetTokens(string1);
-        tokens2 = GetTokens(string2);
+            tokens1 = GetTokens(sentence);
+            using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1);
 
-        using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1);
-        using Tensor<float> embedding2 = await GetEmbeddingAsync(tokens2);
+            float[] results = new float[sentenceList.Count];
+            for (int i = 0; i < sentenceList.Count; i++)
+            {
+                tokens2 = GetTokens(sentenceList[i]);
+                using Tensor<float> embedding2 = await GetEmbeddingAsync(tokens2);
+                float accuracy = DotScore(embedding1, embedding2);
+                results[i] = accuracy;
+            }
+            AllWorkerDispose();
 
-
-        float accuracy =  DotScore(embedding1, embedding2);
-        Debug.Log("Similarity Score: " + accuracy);
-
-        AllWorkerDispose();
+            MeasureSuccess(results);
+        }
+        catch (Exception e)
+        {
+            MeasureFailure(e.Message);
+        }
     }
 
-    private void SplitVocabText()
+    private void SplitVocabTokens()
     {
-        tokens = vocapAsset.text
+
+        vocabTokens = vocapAsset.text
             .Split(new[] {
                 '\n'
             }, StringSplitOptions.RemoveEmptyEntries)
@@ -64,8 +122,8 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .ToArray();
     }
-    
-    public float DotScore(Tensor<float> tensorA, Tensor<float> tensorB)
+
+    private float DotScore(Tensor<float> tensorA, Tensor<float> tensorB)
     {
         // 1. Tensor 데이터 추출 (CPU에서 읽기 가능한 상태로 변환)
         tensorA.CompleteAllPendingOperations();
@@ -90,7 +148,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         Model model = graph.Compile(C);
 
         // 9. Worker 생성 및 동기 실행
-        scoreOpsWorker?.Dispose();        
+        scoreOpsWorker?.Dispose();
         scoreOpsWorker = new Worker(model, GetBackendType());
         scoreOpsWorker.Schedule();
 
@@ -98,12 +156,12 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         using Tensor<float> result = scoreOpsWorker.PeekOutput() as Tensor<float>;
         if (result != null)
         {
-            result.CompleteAllPendingOperations(); 
+            result.CompleteAllPendingOperations();
             return result[0];
         }
         return 0f;
     }
-    
+
     private List<int> GetTokens(string text)
     {
         //split over whitespace
@@ -121,7 +179,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
             for (int i = word.Length; i >= 0; i--)
             {
                 string subword = start == 0 ? word.Substring(start, i) : "##" + word.Substring(start, i - start);
-                int index = Array.IndexOf(tokens, subword);
+                int index = Array.IndexOf(vocabTokens, subword);
                 if (index >= 0)
                 {
                     ids.Add(index);
@@ -140,7 +198,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         return ids;
     }
 
-    private async Task<Tensor<float> >GetEmbeddingAsync(List<int> tokens)
+    private async Task<Tensor<float>> GetEmbeddingAsync(List<int> tokens)
     {
         int N = tokens.Count;
         using var input_ids = new Tensor<int>(new TensorShape(1, N), tokens.ToArray());
@@ -155,15 +213,15 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         modelExecuteWorker.SetInput("input_ids", input_ids);
         modelExecuteWorker.SetInput("attention_mask", attention_mask);
         modelExecuteWorker.SetInput("token_type_ids", token_type_ids);
-        
+
         var executor = modelExecuteWorker.ScheduleIterable();
-        while (executor.MoveNext()) 
+        while (executor.MoveNext())
             await Task.Yield();
 
         using var tokenEmbeddings = modelExecuteWorker.PeekOutput("output") as Tensor<float>;
         if (tokenEmbeddings == null)
         {
-             Debug.LogError("tokenEmbeddings is null. Worker execution may have failed.");
+            Debug.LogError("tokenEmbeddings is null. Worker execution may have failed.");
             return null;
         }
         return await MeanPoolingAsync(tokenEmbeddings, attention_mask);
@@ -225,9 +283,9 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         poolingWorker = new Worker(model, GetBackendType());
         poolingWorker.SetInput("input_0", tokenEmbeddings);
         poolingWorker.SetInput("input_1", attentionMask);
-       
+
         poolingWorker.Schedule();
-        
+
         // 출력 데이터 확인
         Tensor<float> output = poolingWorker.PeekOutput() as Tensor<float>;
         if (output == null)
@@ -242,7 +300,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         Tensor<float> clonedOutput = await output.ReadbackAndCloneAsync();
         return clonedOutput;
     }
-    
+
     private BackendType GetBackendType()
     {
         BackendType backend = SystemInfo.supportsComputeShaders ? BackendType.GPUCompute :
@@ -261,4 +319,68 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         AllWorkerDispose();
         Resources.UnloadUnusedAssets(); // GPU 리소스 강제 해제
     }
+
+  #endregion
+
+
+    #region Events
+
+    public void RegisterSentence(string sentence)
+    {
+        if (maxSentenceCount > SentenceCount && !sentenceList.Contains(sentence))
+        {
+            OnSentenceRegisterSuccessEvent?.Invoke(sentence);
+            sentenceList.Add(sentence);
+        }
+        else
+        {
+            Debug.LogWarning($"Sentence => {sentence} is not registered");
+            OnSentenceRegisterFailEvent?.Invoke();
+        }
+    }
+
+    public void DeleteSentence(string sentence)
+    {
+        if (!sentenceList.Contains(sentence))
+        {
+            Debug.LogError($"Sentence => {sentence} does not exist");
+            return;
+        }
+
+        sentenceList.Remove(sentence);
+        OnSentenceDeleteEvent?.Invoke();
+    }
+
+    private void MeasureFailure(string message)
+    {
+        OnMeasureFailEvent?.Invoke();
+        Debug.LogError($"Detect Fail! \n{message}");
+    }
+
+    private void MeasureSuccess(float[] accuracy)
+    {
+        Debug.Log("Sentences Detected");
+
+        SimilarityResult[] results = new SimilarityResult[accuracy.Length];
+        for (int i = 0; i < accuracy.Length; i++)
+        {
+            Debug.Log($"{sentenceList[i]} => {accuracy[i]}");
+            results[i].accuracy = accuracy[i];
+            results[i].sentence = sentenceList[i];
+        }
+        Array.Sort(results, (a, b) => b.accuracy.CompareTo(a.accuracy));
+
+        OnMeasureSuccessEvent?.Invoke(results);
+    }
+
+  #endregion
+}
+
+
+public enum ActivateType { HuggingFaceAPI, Sentis }
+
+public struct SimilarityResult
+{
+    public string sentence;
+    public float accuracy;
 }

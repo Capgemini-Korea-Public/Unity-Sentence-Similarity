@@ -10,7 +10,7 @@ public class ResultUIEventHandler : BaseScrollViewUI
    
     public void DisplaySimilarityResults(SimilarityResult[] similarityResults)
     {
-        commandText.text = $"Entered Command : {sentenceSimilarityAPI.EnteredSentence}";
+        commandText.text = $"Entered Command : {sentenceSimilarity.EnteredSentence}";
         
         int resultCount = similarityResults.Length;
         int deactiveResultTextCount = resultTextList.Count;

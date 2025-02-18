@@ -119,6 +119,98 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &8929380
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8929382}
+  - component: {fileID: 8929381}
+  m_Layer: 0
+  m_Name: SentenceSmilarity
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &8929381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8929380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69e81498e5b10474dae3f2430db272c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activateType: 0
+  sentenceList: []
+  maxSentenceCount: 0
+  enteredSentence: 
+  sentenceSimilarityModel: {fileID: 5022602860645237092, guid: efa43557f7219104aa7c2651fcacdad9, type: 3}
+  vocapAsset: {fileID: 4900000, guid: 77ba513ee89d822459ac04ae8beec434, type: 3}
+  detectBeginEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1342104723}
+        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
+        m_MethodName: DisableResults
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  detectSuccessEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1342104723}
+        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
+        m_MethodName: DisplaySimilarityResults
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  detectFailEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  sentenceRegisterSuccessEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  sentenceRegisterFailEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  sentenceDeleteEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &8929382
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8929380}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 979.83167, y: 709.2953, z: -3.2199163}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &148244081
 GameObject:
   m_ObjectHideFlags: 0
@@ -575,7 +667,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputFieldEventHandler: {fileID: 701101962}
-  sentenceSimilarityAPI: {fileID: 1581270733}
+  sentenceSimilarityAPI: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1435,9 +1527,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sentenceSimilarityModel: {fileID: 5022602860645237092, guid: efa43557f7219104aa7c2651fcacdad9, type: 3}
   vocapAsset: {fileID: 4900000, guid: 77ba513ee89d822459ac04ae8beec434, type: 3}
-  tokens: []
-  tokens1: 
-  tokens2: 
+  string1: Ji Seung DO
+  string2:
+  - JSD
+  - Seung DO Ji
+  - SeungDO
+  - Sang
+  results: []
 --- !u!4 &853177044
 Transform:
   m_ObjectHideFlags: 0
@@ -2464,7 +2560,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sentenceContentRect: {fileID: 555704904}
   sentencePrefab: {fileID: 2510299984743874938, guid: 10f5454b487c1204481ef1cc949122d2, type: 3}
-  sentenceSimilarityAPI: {fileID: 1581270733}
+  sentenceSimilarityAPI: {fileID: 0}
   commandText: {fileID: 898980795}
 --- !u!1 &1446491375
 GameObject:
@@ -2914,7 +3010,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputFieldEventHandler: {fileID: 701101962}
-  sentenceSimilarityAPI: {fileID: 1581270733}
+  sentenceSimilarityAPI: {fileID: 0}
 --- !u!1 &1581270732
 GameObject:
   m_ObjectHideFlags: 0
@@ -2944,6 +3040,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632367edf45beb6499b8d7951ec1d6b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activateType: 0
   sentenceList: []
   maxSentenceCount: 100
   enteredSentence: 
@@ -3632,7 +3729,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sentenceContentRect: {fileID: 1157199677}
   sentencePrefab: {fileID: 8647032735347412783, guid: 54d541e4d2831744fa9c98afaebd3483, type: 3}
-  sentenceSimilarityAPI: {fileID: 1581270733}
+  sentenceSimilarityAPI: {fileID: 0}
   currentSentenceIndex: 0
 --- !u!1 &2057962923
 GameObject:
@@ -3819,3 +3916,4 @@ SceneRoots:
   - {fileID: 1164254571}
   - {fileID: 1581270734}
   - {fileID: 853177044}
+  - {fileID: 8929382}

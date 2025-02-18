@@ -5,10 +5,10 @@ public class SummitButtonEventHandler : MonoBehaviour
 {
 
     public InputFieldEventHandler inputFieldEventHandler;
-    [FormerlySerializedAs("sentenceSimilarity")] [SerializeField] private SentenceSimilarity_API sentenceSimilarityAPI; 
+    [SerializeField] private SentenceSimilarity sentenceSimilarity; 
     public void OnClickEvent()
     {
-        sentenceSimilarityAPI.DetectSentences(inputFieldEventHandler.GetInputSentence());
+        sentenceSimilarity.MeasureSentenceAccuracy(inputFieldEventHandler.GetInputSentence());
     }
 
 }
