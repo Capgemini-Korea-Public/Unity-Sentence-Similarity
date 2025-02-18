@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Sentis;
 using UnityEngine;
@@ -14,15 +16,14 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
     public ModelAsset sentenceSimilarityModel;
     public TextAsset vocapAsset;
 
-    private Worker sentenceSimilarityWorker;
+    private Worker modelExecuteWorker;
+    private Worker scoreOpsWorker;
     private Worker poolingWorker;
 
     string string1 = "That is a happy person"; // similarity = 1
 
     //Choose a string to comapre string1  to:
-    string string2 = "That is a happy dog"; // similarity = 0.695
-    //string string2 = "That is a very happy person";   // similarity = 0.943
-    //string string2 = "Today is a sunny day";          // similarity = 0.257
+    string string2 = "That is a happy person"; // similarity = 0.695
 
     //Special tokens
     const int START_TOKEN = 101;
@@ -33,36 +34,37 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
     public List<int> tokens1;
     public List<int> tokens2;
 
-    private void Start()
+    private async void Start()
     {
-        // 백엔드 선택 로직 개선
-        // 백엔드 결정 (GPUCompute, GPUPixel, CPU 등)
+        SplitVocabText();
 
         var model = ModelLoader.Load(sentenceSimilarityModel);
-        sentenceSimilarityWorker = new Worker(model, GetBackendType());
-
-        tokens = vocapAsset.text
-            .Split(new[] {
-                '\n'
-            }, System.StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => line.Trim())
-            .Where(line => !string.IsNullOrWhiteSpace(line))
-            .ToArray();
+        modelExecuteWorker = new Worker(model, GetBackendType());
 
         tokens1 = GetTokens(string1);
         tokens2 = GetTokens(string2);
 
-        Tensor<float> embedding1 = GetEmbedding(tokens1);
-        Tensor<float> embedding2 = GetEmbedding(tokens2);
+        using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1);
+        using Tensor<float> embedding2 = await GetEmbeddingAsync(tokens2);
 
 
-        Debug.Log("Similarity Score: " + DotScore(embedding1, embedding2));
-        
-        embedding1.Dispose();
-        embedding2.Dispose();
-        sentenceSimilarityWorker.Dispose();
+        float accuracy =  DotScore(embedding1, embedding2);
+        Debug.Log("Similarity Score: " + accuracy);
+
+        AllWorkerDispose();
     }
 
+    private void SplitVocabText()
+    {
+        tokens = vocapAsset.text
+            .Split(new[] {
+                '\n'
+            }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Trim())
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .ToArray();
+    }
+    
     public float DotScore(Tensor<float> tensorA, Tensor<float> tensorB)
     {
         // 1. Tensor 데이터 추출 (CPU에서 읽기 가능한 상태로 변환)
@@ -88,16 +90,18 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         Model model = graph.Compile(C);
 
         // 9. Worker 생성 및 동기 실행
-        using Worker worker = new Worker(model, GetBackendType());
-        worker.Schedule(); // Schedule() → Execute()로 수정
+        scoreOpsWorker?.Dispose();        
+        scoreOpsWorker = new Worker(model, GetBackendType());
+        scoreOpsWorker.Schedule();
 
         // 10. 결과 추출
-        using Tensor<float> result = worker.PeekOutput() as Tensor<float>;
-        result.CompleteAllPendingOperations();
-        
-        poolingWorker.Dispose();
-   
-        return result[0];
+        using Tensor<float> result = scoreOpsWorker.PeekOutput() as Tensor<float>;
+        if (result != null)
+        {
+            result.CompleteAllPendingOperations(); 
+            return result[0];
+        }
+        return 0f;
     }
     
     private List<int> GetTokens(string text)
@@ -117,7 +121,7 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
             for (int i = word.Length; i >= 0; i--)
             {
                 string subword = start == 0 ? word.Substring(start, i) : "##" + word.Substring(start, i - start);
-                int index = System.Array.IndexOf(tokens, subword);
+                int index = Array.IndexOf(tokens, subword);
                 if (index >= 0)
                 {
                     ids.Add(index);
@@ -131,12 +135,12 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
 
         ids.Add(END_TOKEN);
 
-        Debug.Log("Tokenized sentece = " + s);
+        Debug.Log("Tokenized sentence = " + s);
 
         return ids;
     }
 
-    private Tensor<float> GetEmbedding(List<int> tokens)
+    private async Task<Tensor<float> >GetEmbeddingAsync(List<int> tokens)
     {
         int N = tokens.Count;
         using var input_ids = new Tensor<int>(new TensorShape(1, N), tokens.ToArray());
@@ -148,16 +152,24 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         }
         using var attention_mask = new Tensor<int>(new TensorShape(1, N), mask);
 
-        sentenceSimilarityWorker.SetInput("input_ids", input_ids);
-        sentenceSimilarityWorker.SetInput("attention_mask", attention_mask);
-        sentenceSimilarityWorker.SetInput("token_type_ids", token_type_ids);
-        sentenceSimilarityWorker.Schedule();
+        modelExecuteWorker.SetInput("input_ids", input_ids);
+        modelExecuteWorker.SetInput("attention_mask", attention_mask);
+        modelExecuteWorker.SetInput("token_type_ids", token_type_ids);
+        
+        var executor = modelExecuteWorker.ScheduleIterable();
+        while (executor.MoveNext()) 
+            await Task.Yield();
 
-        using var tokenEmbeddings = sentenceSimilarityWorker.PeekOutput("output") as Tensor<float>;
-        return MeanPooling(tokenEmbeddings, attention_mask);
+        using var tokenEmbeddings = modelExecuteWorker.PeekOutput("output") as Tensor<float>;
+        if (tokenEmbeddings == null)
+        {
+             Debug.LogError("tokenEmbeddings is null. Worker execution may have failed.");
+            return null;
+        }
+        return await MeanPoolingAsync(tokenEmbeddings, attention_mask);
     }
 
-    private Tensor<float> MeanPooling(Tensor<float> tokenEmbeddings, Tensor<int> attentionMask)
+    private async Task<Tensor<float>> MeanPoolingAsync(Tensor<float> tokenEmbeddings, Tensor<int> attentionMask)
     {
         // 1. FunctionalGraph 생성 및 입력 등록
         FunctionalGraph graph = new FunctionalGraph();
@@ -209,17 +221,28 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         Model model = graph.Compile(normalizedMean);
 
         // 13. Worker 생성 및 실행 (예: CPU 백엔드 사용)
+        poolingWorker?.Dispose();
         poolingWorker = new Worker(model, GetBackendType());
         poolingWorker.SetInput("input_0", tokenEmbeddings);
         poolingWorker.SetInput("input_1", attentionMask);
+       
         poolingWorker.Schedule();
-
-        Tensor<float> output = poolingWorker.PeekOutput() as Tensor<float>;
-        output.CompleteAllPendingOperations();
         
-        return output;
-    }
+        // 출력 데이터 확인
+        Tensor<float> output = poolingWorker.PeekOutput() as Tensor<float>;
+        if (output == null)
+        {
+            Debug.LogError("Output is null. Worker execution may have failed.");
+            return null;
+        }
 
+        output.CompleteAllPendingOperations();
+
+        // 출력 데이터 복제 및 반환
+        Tensor<float> clonedOutput = await output.ReadbackAndCloneAsync();
+        return clonedOutput;
+    }
+    
     private BackendType GetBackendType()
     {
         BackendType backend = SystemInfo.supportsComputeShaders ? BackendType.GPUCompute :
@@ -227,4 +250,15 @@ public class SentenceSimilarity_Sentis : MonoBehaviour
         return backend;
     }
 
+    private void AllWorkerDispose()
+    {
+        modelExecuteWorker?.Dispose();
+        poolingWorker?.Dispose();
+        scoreOpsWorker?.Dispose();
+    }
+    private void OnDestroy()
+    {
+        AllWorkerDispose();
+        Resources.UnloadUnusedAssets(); // GPU 리소스 강제 해제
+    }
 }

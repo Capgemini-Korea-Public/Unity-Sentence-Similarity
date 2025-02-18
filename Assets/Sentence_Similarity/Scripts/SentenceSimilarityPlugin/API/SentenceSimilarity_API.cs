@@ -10,8 +10,13 @@ public struct SimilarityResult
     public float accuracy;
 }
 
+public enum ActivateType {API , Sentis}
+
 public class SentenceSimilarity_API : MonoBehaviour
 {
+    [Header(" Model Information")]
+    [SerializeField] private ActivateType activateType;
+    
     [Header("# Base Information")]
     [SerializeField] private List<string> sentenceList;
     [SerializeField] private int maxSentenceCount;
