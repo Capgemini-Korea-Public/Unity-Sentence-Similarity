@@ -1,0 +1,26 @@
+{
+    "name": "com.capgemini.sentencesimilarity",
+    "version": "1.0.0",
+    "displayName": "Sentence Similarity Unity",
+    "description": "A custom Unity package for Sentence Similarity",
+    "unity": "2021.3",
+    "keywords": [
+        "sentence-similarity",
+        "unity"
+    ],
+    "dependencies": {
+        "com.unity.sentis": "2.1.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git"
+    },
+    "samples": [
+        {
+            "displayName": "Sentence Similarity Example",
+            "description": "Example scene for Sentence Similarity",
+            "path": "Samples/Example Sentence Similarity"
+        }
+    ],
+    "documentationUrl": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity"
+}  
