@@ -66,17 +66,18 @@ public class SentenceSimilarity : MonoBehaviour
     // Sentence Similarity Model Run from Sentis
     #region Sentis
 
-    private Worker modelExecuteWorker;
-    private Worker scoreOpsWorker;
-    private Worker poolingWorker;
-
-    private string[] vocabTokens;
-    private List<int> tokens1;
-    private List<int> tokens2;
-
-    private const int START_TOKEN = 101;
-    private const int END_TOKEN = 102;
-
+      private Worker modelExecuteWorker; // Worker for executing the model
+      private Worker scoreOpsWorker; // Worker for scoring operations
+      private Worker poolingWorker; // Worker for pooling operations
+  
+      private string[] vocabTokens; // Array of vocabulary tokens
+      private List<int> tokens1; // Tokenized representation of the first sentence
+      private List<int> tokens2; // Tokenized representation of the second sentence
+  
+      private const int START_TOKEN = 101; // Start token ID
+      private const int END_TOKEN = 102; // End token ID
+      
+    // Asynchronously executes the model with a given sentence and compares it against a list of sentences      
     private async void ExecuteModelFromSentis(string sentence)
     {
         try
@@ -85,20 +86,20 @@ public class SentenceSimilarity : MonoBehaviour
             OnMeasureBeginEvent?.Invoke();
             
             if (vocabTokens == null)
-                SplitVocabTokens();
+                SplitVocabTokens(); // Split vocabulary tokens if not already initialized
 
             var model = ModelLoader.Load(sentenceSimilarityModel);
             modelExecuteWorker = new Worker(model, GetBackendType());
 
-            tokens1 = GetTokens(sentence);
-            using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1);
+            tokens1 = GetTokens(sentence); // Tokenize the input sentence
+            using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1); // Get embedding for the first sentence
 
             float[] results = new float[sentenceList.Count];
             for (int i = 0; i < sentenceList.Count; i++)
             {
-                tokens2 = GetTokens(sentenceList[i]);
-                using Tensor<float> embedding2 = await GetEmbeddingAsync(tokens2);
-                float accuracy = DotScore(embedding1, embedding2);
+                tokens2 = GetTokens(sentenceList[i]); // Tokenize each comparison sentence
+                using Tensor<float> embedding2 = await GetEmbeddingAsync(tokens2); // Get embedding for the comparison sentence
+                float accuracy = DotScore(embedding1, embedding2); // Calculate similarity score
                 results[i] = accuracy;
             }
             AllWorkerDispose();
@@ -111,6 +112,7 @@ public class SentenceSimilarity : MonoBehaviour
         }
     }
 
+    // Splits the vocabulary asset into individual tokens
     private void SplitVocabTokens()
     {
 
@@ -123,48 +125,44 @@ public class SentenceSimilarity : MonoBehaviour
             .ToArray();
     }
 
+    // Calculates the dot product score between two tensors (used for similarity measurement)
     private float DotScore(Tensor<float> tensorA, Tensor<float> tensorB)
     {
-        // 1. Tensor 데이터 추출 (CPU에서 읽기 가능한 상태로 변환)
-        tensorA.CompleteAllPendingOperations();
-        tensorB.CompleteAllPendingOperations();
-        float[] dataA = tensorA.DownloadToArray();
-        float[] dataB = tensorB.DownloadToArray();
+        tensorA.CompleteAllPendingOperations(); // Ensure all GPU operations are completed for tensorA
+        tensorB.CompleteAllPendingOperations(); // Ensure all GPU operations are completed for tensorB
 
-        // 2. FunctionalGraph 생성
-        FunctionalGraph graph = new FunctionalGraph();
+        float[] dataA = tensorA.DownloadToArray(); // Download tensorA data to CPU-readable array
+        float[] dataB = tensorB.DownloadToArray(); // Download tensorB data to CPU-readable array
 
-        // 3. Functional.Constant 올바른 사용법 
-        FunctionalTensor A = Functional.Constant(tensorA.shape, dataA);
-        FunctionalTensor B = Functional.Constant(tensorB.shape, dataB);
+        FunctionalGraph graph = new FunctionalGraph(); // Create a functional graph for computation
 
-        // 4. 텐서 전치 추가 (MatMul 차원 조건 충족)
-        FunctionalTensor B_Transposed = Functional.Transpose(B, 0, 1);
+        FunctionalTensor A = Functional.Constant(tensorA.shape, dataA); // Create constant tensor A from dataA
+        FunctionalTensor B = Functional.Constant(tensorB.shape, dataB); // Create constant tensor B from dataB
 
-        // 5. 행렬 곱셈 (1,384) x (384,1) → (1,1)
-        FunctionalTensor C = Functional.MatMul(A, B_Transposed);
+        FunctionalTensor B_Transposed = Functional.Transpose(B, 0, 1); // Transpose B to match matrix multiplication dimensions
 
-        // 8. 모델 컴파일
-        Model model = graph.Compile(C);
+        FunctionalTensor C = Functional.MatMul(A, B_Transposed); // Perform matrix multiplication
 
-        // 9. Worker 생성 및 동기 실행
+        Model model = graph.Compile(C); // Compile the computation graph into a model
+
         scoreOpsWorker?.Dispose();
         scoreOpsWorker = new Worker(model, GetBackendType());
         scoreOpsWorker.Schedule();
 
-        // 10. 결과 추출
         using Tensor<float> result = scoreOpsWorker.PeekOutput() as Tensor<float>;
         if (result != null)
         {
             result.CompleteAllPendingOperations();
             return result[0];
         }
+
         return 0f;
+
     }
 
+    // Converts a text input into a list of token IDs based on the vocabulary
     private List<int> GetTokens(string text)
     {
-        //split over whitespace
         string[] words = text.ToLower().Split(null);
 
         var ids = new List<int> {
@@ -198,95 +196,106 @@ public class SentenceSimilarity : MonoBehaviour
         return ids;
     }
 
+    // Asynchronously retrieves the embedding for a given list of tokens.
     private async Task<Tensor<float>> GetEmbeddingAsync(List<int> tokens)
     {
-        int N = tokens.Count;
-        using var input_ids = new Tensor<int>(new TensorShape(1, N), tokens.ToArray());
-        using var token_type_ids = new Tensor<int>(new TensorShape(1, N), new int[N]);
-        int[] mask = new int[N];
+        int tokensCount = tokens.Count;
+        using var input_ids = new Tensor<int>(new TensorShape(1, tokensCount), tokens.ToArray());
+        using var token_type_ids = new Tensor<int>(new TensorShape(1, tokensCount), new int[tokensCount]);
+        
+        // Create an attention mask where all tokens are considered.
+        int[] mask = new int[tokensCount];
         for (int i = 0; i < mask.Length; i++)
         {
             mask[i] = 1;
         }
-        using var attention_mask = new Tensor<int>(new TensorShape(1, N), mask);
+        using var attention_mask = new Tensor<int>(new TensorShape(1, tokensCount), mask);
 
+        // Set inputs for the model execution worker.
         modelExecuteWorker.SetInput("input_ids", input_ids);
         modelExecuteWorker.SetInput("attention_mask", attention_mask);
         modelExecuteWorker.SetInput("token_type_ids", token_type_ids);
 
+        // Execute the model asynchronously.
         var executor = modelExecuteWorker.ScheduleIterable();
         while (executor.MoveNext())
             await Task.Yield();
 
+        // Retrieve the output embeddings from the worker.
         using var tokenEmbeddings = modelExecuteWorker.PeekOutput("output") as Tensor<float>;
         if (tokenEmbeddings == null)
         {
             Debug.LogError("tokenEmbeddings is null. Worker execution may have failed.");
             return null;
         }
+        
+        // Apply mean pooling to the embeddings.
         return await MeanPoolingAsync(tokenEmbeddings, attention_mask);
     }
 
+    // Applies mean pooling to the token embeddings, considering the attention mask.
     private async Task<Tensor<float>> MeanPoolingAsync(Tensor<float> tokenEmbeddings, Tensor<int> attentionMask)
     {
-        // 1. FunctionalGraph 생성 및 입력 등록
+        // 1. Create a functional graph for mean pooling operations.
         FunctionalGraph graph = new FunctionalGraph();
+
+        // 2. Add input nodes for token embeddings and attention mask.
         var tokenEmbeddingsInput = graph.AddInput<float>(tokenEmbeddings.shape);
         var attentionMaskInput = graph.AddInput<int>(attentionMask.shape);
 
-        // 2. attentionMask를 마지막 차원에 Unsqueeze
-        // 예를 들어, Unsqueeze(-1)은 [B, L] -> [B, L, 1]로 변경합니다.
+        // 3. Reshape the attention mask to match the embedding dimensions.
+        // For example, reshape from [B, L] to [B, L, 1].
         var reshapedMask = Functional.Reshape(attentionMaskInput, attentionMask.shape.Unsqueeze(-1).ToArray());
 
-        // 3. tokenEmbeddings와 같은 shape으로 Broadcast
+        // 4. Broadcast the mask to match the shape of token embeddings.
         var expandedMask = Functional.BroadcastTo(reshapedMask, tokenEmbeddings.shape.ToArray());
 
-        // 4. mask를 float으로 캐스팅
+        // 5. Cast the mask to float type.
         var maskFloat = expandedMask.Float();
 
-        // 5. tokenEmbeddings와 mask의 element-wise 곱셈
+        // 6. Perform element-wise multiplication between embeddings and mask.
         var maskedEmbeddings = Functional.Mul(tokenEmbeddingsInput, maskFloat);
 
-        // 6. 토큰 차원(예: dim=1)으로 합산하여 임베딩 합 계산
+        // 7. Sum the masked embeddings along the token dimension (e.g., dim=1).
         var sumEmbeddings = Functional.ReduceSum(maskedEmbeddings, new int[] {
             1
         }, keepdim: false);
 
-        // 7. mask도 같은 방식으로 합산 (평균 계산용)
+        // 8. Sum the mask values along the same dimension for averaging.
         var sumMask = Functional.ReduceSum(maskFloat, new int[] {
             1
         }, keepdim: false);
 
-        // 8. sumMask에 대해 clip: 스칼라 상수를 사용하여 broadcast 처리
-        var lowerConst = Functional.Constant(1e-9f);
-        var upperConst = Functional.Constant(float.MaxValue);
+        // 9. Clip the sum of mask values to avoid division by zero.
+        var lowerConst = Functional.Constant(1e-9f); // Lower bound
+        var upperConst = Functional.Constant(float.MaxValue); // Upper bound
         var clippedMask = Functional.Max(Functional.Min(sumMask, upperConst), lowerConst);
 
-        // 9. 평균 임베딩 계산
+        // 10. Calculate the mean embeddings by dividing the sum of embeddings by the clipped mask sum.
         var meanEmbeddings = Functional.Div(sumEmbeddings, clippedMask);
 
-        // 10. L2 norm 계산: norm = sqrt(ReduceSum(Square(meanEmbeddings), dim=1, keepdim=true))
+        // 11. Calculate the L2 norm of the mean embeddings.
         var squaredMean = Functional.Square(meanEmbeddings);
         var sumSquare = Functional.ReduceSum(squaredMean, new int[] {
             1
         }, keepdim: true);
         var l2Norm = Functional.Sqrt(sumSquare);
 
-        // 11. 정규화: meanEmbeddings / l2Norm
+        // 12. Normalize the mean embeddings by dividing by their L2 norm.
         var normalizedMean = Functional.Div(meanEmbeddings, l2Norm);
 
-        // 12. FunctionalGraph 컴파일
+        // 13. Compile the functional graph into a model.
         Model model = graph.Compile(normalizedMean);
 
-        // 13. Worker 생성 및 실행 (예: CPU 백엔드 사용)
+        // 14. Create and execute a worker for mean pooling (e.g., using CPU backend).
         poolingWorker?.Dispose();
         poolingWorker = new Worker(model, GetBackendType());
         poolingWorker.SetInput("input_0", tokenEmbeddings);
         poolingWorker.SetInput("input_1", attentionMask);
 
         poolingWorker.Schedule();
-
-        // 출력 데이터 확인
+        
+        // Retrieve the output from the worker.
         Tensor<float> output = poolingWorker.PeekOutput() as Tensor<float>;
         if (output == null)
         {
@@ -295,8 +304,6 @@ public class SentenceSimilarity : MonoBehaviour
         }
 
         output.CompleteAllPendingOperations();
-
-        // 출력 데이터 복제 및 반환
         Tensor<float> clonedOutput = await output.ReadbackAndCloneAsync();
         return clonedOutput;
     }
