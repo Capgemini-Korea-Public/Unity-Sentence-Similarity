@@ -12,6 +12,11 @@ public class SentenceListUIEventHandler : BaseScrollViewUI
     private void Start()
     {
         sentenceSimilarity.OnSentenceRegisterSuccessEvent.AddListener(RegisterSentence);
+
+        for (int i = 0; i < sentenceSimilarity.SentenceCount; i++)
+        {
+            RegisterSentence(sentenceSimilarity.SentenceList[i]);
+        }
     }
     
     private void RegisterSentence(string sentence)
