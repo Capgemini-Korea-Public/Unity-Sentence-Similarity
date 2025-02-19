@@ -9,13 +9,14 @@ public class SentenceListUIEventHandler : BaseScrollViewUI
     [SerializeField] private int currentSentenceIndex;
     private Queue<SentenceInfo> deactiveSentenceUIQueue = new Queue<SentenceInfo>();
 
+    
     private void Start()
     {
-        sentenceSimilarity.OnSentenceRegisterSuccessEvent.AddListener(RegisterSentence);
+        sentenceSimilarityController.OnSentenceRegisterSuccessEvent.AddListener(RegisterSentence);
 
-        for (int i = 0; i < sentenceSimilarity.SentenceCount; i++)
+        for (int i = 0; i < sentenceSimilarityController.SentenceCount; i++)
         {
-            RegisterSentence(sentenceSimilarity.SentenceList[i]);
+            RegisterSentence(sentenceSimilarityController.SentenceList[i]);
         }
     }
     
@@ -32,7 +33,7 @@ public class SentenceListUIEventHandler : BaseScrollViewUI
         sentenceInfo.gameObject.SetActive(false);
         currentSentenceIndex--;
         deactiveSentenceUIQueue.Enqueue(sentenceInfo);
-        sentenceSimilarity.DeleteSentence(sentenceInfo.Sentence);
+        sentenceSimilarityController.DeleteSentence(sentenceInfo.Sentence);
     }
 
     private SentenceInfo GetSentenceUI()

@@ -8,8 +8,5 @@ public class BaseScrollViewUI : MonoBehaviour
     [Header("# Content Prefab")]
     [SerializeField] protected GameObject sentencePrefab;
     
-    [FormerlySerializedAs("sentenceSimilarityAPI")]
-    [Header("# Sentence Similarity Plugin")]
-    [SerializeField] protected SentenceSimilarity sentenceSimilarity;
-
+    protected SentenceSimilarityController sentenceSimilarityController => SentenceSimilarityController.Instance;
 }
