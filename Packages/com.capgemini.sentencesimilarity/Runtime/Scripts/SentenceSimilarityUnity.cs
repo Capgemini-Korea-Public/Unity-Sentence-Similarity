@@ -16,6 +16,7 @@ namespace SentenceSimilarityUnity
 
         public static void MeasureSentenceAccuracyFromAPI(string input, Action<float[]> onMeasureSuccess, Action<string> onMeasureFailure, string[] context)
         {
+            
             if (context.Length == 0 || input == "")
             {
                 onMeasureFailure?.Invoke("No sentences to detect.");
@@ -68,7 +69,8 @@ namespace SentenceSimilarityUnity
         {
             try
             {
-
+                // 츨정 시작
+                DateTime startTime = DateTime.Now; // 시작 시간 기록
 
                 if (_vocabTokens == null)
                 {
@@ -94,6 +96,11 @@ namespace SentenceSimilarityUnity
                 AllWorkerDispose();
 
                 onMeasureSuccess?.Invoke(results);
+          
+                DateTime endTime = DateTime.Now; // 종료 시간 기록
+                TimeSpan duration = endTime - startTime; // 소요 시간 계산
+                Debug.Log($"ExecuteModelFromSentis 실행 시간: {duration.Hours:D2}:{duration.Minutes:D2}:{duration.Seconds:D2}.{duration.Milliseconds:D3}"); // 로그 출력
+
             }
             catch (Exception e)
             {

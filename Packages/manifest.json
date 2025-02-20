@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.capgemini.sentencesimilarity": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git?path=/Packages/com.capgemini.sentencesimilarity#main",
     "com.huggingface.api": "https://github.com/huggingface/unity-api.git",
     "com.unity.ai.navigation": "2.0.5",
     "com.unity.collab-proxy": "2.6.0",

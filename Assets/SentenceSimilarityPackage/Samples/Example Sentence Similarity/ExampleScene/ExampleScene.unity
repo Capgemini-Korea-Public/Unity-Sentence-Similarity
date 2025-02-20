@@ -119,96 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &8929380
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8929382}
-  - component: {fileID: 8929383}
-  m_Layer: 0
-  m_Name: SentenceSmilarity
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8929382
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8929380}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 979.83167, y: 709.2953, z: -3.2199163}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8929383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8929380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c84acfce0b0e89748aff7735b0ada7d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  activateType: 0
-  sentenceList: []
-  maxSentenceCount: 100
-  enteredSentence: 
-  OnMeasureBeginEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1342104723}
-        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
-        m_MethodName: DisableResults
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnMeasureSuccessEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1342104723}
-        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
-        m_MethodName: DisplaySimilarityResults
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnMeasureFailEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSentenceRegisterSuccessEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSentenceRegisterFailEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSentenceDeleteEvent:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &148244081
 GameObject:
   m_ObjectHideFlags: 0
@@ -3457,6 +3367,96 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1874313900}
   m_CullTransparentMesh: 1
+--- !u!1 &1974728063
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1974728066}
+  - component: {fileID: 1974728064}
+  m_Layer: 0
+  m_Name: SentenceSmilarity
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1974728064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974728063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2b0c261c3247db4e8774cb925a10fb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activateType: 1
+  sentenceList: []
+  maxSentenceCount: 100
+  enteredSentence: 
+  OnMeasureBeginEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1342104723}
+        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
+        m_MethodName: DisableResults
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMeasureSuccessEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1342104723}
+        m_TargetAssemblyTypeName: ResultUIEventHandler, Assembly-CSharp
+        m_MethodName: DisplaySimilarityResults
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnMeasureFailEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSentenceRegisterSuccessEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSentenceRegisterFailEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSentenceDeleteEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1974728066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974728063}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 979.83167, y: 709.2953, z: -3.2199163}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2037094789
 GameObject:
   m_ObjectHideFlags: 0
@@ -3765,4 +3765,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1638715533}
   - {fileID: 1164254571}
-  - {fileID: 8929382}
+  - {fileID: 1974728066}

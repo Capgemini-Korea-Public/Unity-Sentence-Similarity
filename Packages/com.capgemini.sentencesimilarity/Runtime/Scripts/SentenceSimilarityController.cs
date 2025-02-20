@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using HuggingFace.API;
 using SentenceSimilarityUnity;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Rendering;
 
+
+[AddComponentMenu("SentenceSimilarity/Sentence Similarity Controller")]
 public class SentenceSimilarityController : MonoBehaviour
 {
     private static SentenceSimilarityController instance;
