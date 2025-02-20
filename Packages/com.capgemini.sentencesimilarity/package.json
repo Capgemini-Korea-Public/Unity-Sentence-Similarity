@@ -11,6 +11,10 @@
     "dependencies": {
         "com.unity.sentis": "2.1.2"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git"
+    },
     "samples": [
         {
             "displayName": "Sentence Similarity Example",
