@@ -15,6 +15,11 @@
         "type": "git",
         "url": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git"
     },
+    "author": {
+        "name": "Capgemini",
+        "email": "twotwo12345678@gmail.com",
+        "url": "https://github.com/seungdo1234"
+    },
     "samples": [
         {
             "displayName": "Sentence Similarity Example",
