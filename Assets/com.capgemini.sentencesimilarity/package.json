@@ -24,7 +24,7 @@
         {
             "displayName": "Sentence Similarity Example",
             "description": "Example scene for Sentence Similarity",
-            "path": "Samples~/Example Sentence Similarity"
+            "path": "Samples/Example Sentence Similarity"
         }
     ],
     "documentationUrl": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity"

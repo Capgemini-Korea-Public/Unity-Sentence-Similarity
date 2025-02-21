@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using HuggingFace.API;
 using Unity.Sentis;
@@ -69,8 +70,7 @@ namespace SentenceSimilarityUnity
         {
             try
             {
-                // 츨정 시작
-                DateTime startTime = DateTime.Now; // 시작 시간 기록
+                DateTime startTime = DateTime.Now; // Timer Start
 
                 if (_vocabTokens == null)
                 {
@@ -81,7 +81,7 @@ namespace SentenceSimilarityUnity
 
                 var model = ModelLoader.Load(_modelAsset);
                 _modelExecuteWorker = new Worker(model, GetBackendType());
-
+                
                 List<int> tokens1 = GetTokens(input); // Tokenize the input sentence
                 using Tensor<float> embedding1 = await GetEmbeddingAsync(tokens1); // Get embedding for the first sentence
 
@@ -159,13 +159,14 @@ namespace SentenceSimilarityUnity
         // Converts a text input into a list of token IDs based on the vocabulary
         private static List<int> GetTokens(string text)
         {
+
             string[] words = text.ToLower().Split(null);
 
             var ids = new List<int> {
                 START_TOKEN
             };
 
-            string s = "";
+            var sb = new StringBuilder();
 
             foreach (var word in words)
             {
@@ -177,7 +178,7 @@ namespace SentenceSimilarityUnity
                     if (index >= 0)
                     {
                         ids.Add(index);
-                        s += subword + " ";
+                        sb.Append(subword).Append(' ');
                         if (i == word.Length) break;
                         start = i;
                         i = word.Length + 1;
@@ -187,10 +188,11 @@ namespace SentenceSimilarityUnity
 
             ids.Add(END_TOKEN);
 
-            Debug.Log("Tokenized sentence = " + s);
+            Debug.Log($"Tokenized sentence = {sb.ToString().Trim()}");
 
             return ids;
         }
+
 
         // Asynchronously retrieves the embedding for a given list of tokens.
         private static async Task<Tensor<float>> GetEmbeddingAsync(List<int> tokens)

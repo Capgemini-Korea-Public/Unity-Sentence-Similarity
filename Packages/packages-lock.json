@@ -1,12 +1,13 @@
 {
   "dependencies": {
     "com.capgemini.sentencesimilarity": {
-      "version": "file:com.capgemini.sentencesimilarity",
+      "version": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git?path=/Packages/com.capgemini.sentencesimilarity#main",
       "depth": 0,
-      "source": "embedded",
+      "source": "git",
       "dependencies": {
         "com.unity.sentis": "2.1.2"
-      }
+      },
+      "hash": "ef7425c53d289db98f7ce8d28ec2f1d0eb21aed0"
     },
     "com.huggingface.api": {
       "version": "https://github.com/huggingface/unity-api.git",

@@ -13,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity.git"
+        "url": "https://github.com/seungdo1234/Sentence-Similarity-from-Unity"
     },
     "author": {
         "name": "Capgemini",
@@ -27,5 +27,5 @@
             "path": "Samples~/Example Sentence Similarity"
         }
     ],
-    "documentationUrl": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity"
+    "documentationUrl": "https://github.com/seungdo1234/Sentence-Similarity-from-Unity"
 }  
