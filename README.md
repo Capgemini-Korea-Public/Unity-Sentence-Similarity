@@ -90,4 +90,9 @@ public class SentenceSimilarityExample : MonoBehaviour
 
 ---
 
+## Contact
+Have questions or need help? Feel free to reach out at `twotwo12345678@gmail.com`. 
+We’d love to hear from you!
+
+---
 **Start building smarter games with Unity today!**
