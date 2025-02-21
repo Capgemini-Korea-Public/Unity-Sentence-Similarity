@@ -1,6 +1,6 @@
 # Sentence Similarity from Unity
 
-![Unity](https://img.shields.io/badge/Unity-2023.2+-black.svg?style=flat&logo=unity) ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat) ![Status](https://img.shields.io/badge/Status-Active-green.svg?style=flat)
+![Unity](https://img.shields.io/badge/Unity-2023.2+-black.svg?style=flat&logo=unity) ![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat) 
 
 Welcome to **Sentence Similarity from Unity** – a powerful Unity module that simplifies the use of AI models to infer the most similar sentence to a given input. Perfect for creating intelligent NPCs, enhancing dialogue systems, or powering text-based features in your game, this tool supports two execution options: **Sentis** for local inference and **HuggingFace** for robust API-driven models.
 
