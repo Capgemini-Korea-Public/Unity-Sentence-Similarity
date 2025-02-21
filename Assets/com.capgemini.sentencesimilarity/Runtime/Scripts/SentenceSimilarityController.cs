@@ -22,12 +22,12 @@ public class SentenceSimilarityController : MonoBehaviour
     public int SentenceCount => sentenceList.Count;
     public string EnteredSentence => enteredSentence;
 
-    [Header("Detection Events")]
+    [Header("Measure Events")]
     [SerializeField] public UnityEvent OnMeasureBeginEvent;
     [SerializeField] public UnityEvent<SimilarityResult[]> OnMeasureSuccessEvent;
     [SerializeField] public UnityEvent OnMeasureFailEvent;
 
-    [Header("Sentence Events")]
+    [Header("Register Events")]
     [SerializeField] public UnityEvent<string> OnSentenceRegisterSuccessEvent;
     [SerializeField] public UnityEvent OnSentenceRegisterFailEvent;
     [SerializeField] public UnityEvent OnSentenceDeleteEvent;
