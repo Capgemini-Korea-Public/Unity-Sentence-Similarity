@@ -41,10 +41,11 @@ Add the `SentenceSimilarityController` component to a GameObject in your Unity s
 ![image](https://github.com/user-attachments/assets/e0a8a4d3-5788-4af3-9dd6-5d432fbf1e5c)
 
 1. Attach the `SentenceSimilarityController` script to a GameObject.
-2. Configure the component in the Inspector:
+2. Configure the component in the Inspector
 - Set the **Activate Type** to either `HuggingFaceAPI` or `Sentis`.
 - Populate the **Sentence List** with sentences to compare against.
 - Assign Unity Events for success, failure, and other actions (e.g `OnMeasureSuccessEvent`).
+3. Check out the sample scene for an exact example!
 
 ### Sample Code
 ```csharp
