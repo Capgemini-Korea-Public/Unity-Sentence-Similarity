@@ -22,18 +22,18 @@ public class SentenceSimilarityController : MonoBehaviour
     public int SentenceCount => sentenceList.Count;
     public string EnteredSentence => enteredSentence;
 
-    [Header("Detection Events")]
+    [Header("Measure Events")]
     [SerializeField] public UnityEvent OnMeasureBeginEvent;
     [SerializeField] public UnityEvent<SimilarityResult[]> OnMeasureSuccessEvent;
     [SerializeField] public UnityEvent OnMeasureFailEvent;
 
-    [Header("Sentence Events")]
+    [Header("Register Events")]
     [SerializeField] public UnityEvent<string> OnSentenceRegisterSuccessEvent;
     [SerializeField] public UnityEvent OnSentenceRegisterFailEvent;
     [SerializeField] public UnityEvent OnSentenceDeleteEvent;
 
     private bool isExecute;
-
+    private SentenceSaveSystem saveSystem;
     // Set Singleton Object
     private void Awake()
     {
@@ -45,6 +45,9 @@ public class SentenceSimilarityController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
+        saveSystem = new SentenceSaveSystem();
+        sentenceList = saveSystem.LoadSentences();
     }
     
     public void MeasureSentenceAccuracy(string input)
@@ -73,12 +76,13 @@ public class SentenceSimilarityController : MonoBehaviour
     
     #region Events
 
-    public void RegisterSentence(string input)
+    public async void RegisterSentence(string input)
     {
         if (maxSentenceCount > SentenceCount && !sentenceList.Contains(input))
         {
             OnSentenceRegisterSuccessEvent?.Invoke(input);
             sentenceList.Add(input);
+            await saveSystem.SaveSentencesAsync(sentenceList);
         }
         else
         {
@@ -87,7 +91,7 @@ public class SentenceSimilarityController : MonoBehaviour
         }
     }
 
-    public void DeleteSentence(string input)
+    public async void DeleteSentence(string input)
     {
         if (!sentenceList.Contains(input))
         {
@@ -97,6 +101,7 @@ public class SentenceSimilarityController : MonoBehaviour
 
         sentenceList.Remove(input);
         OnSentenceDeleteEvent?.Invoke();
+        await saveSystem.SaveSentencesAsync(sentenceList);
     }
 
     private void MeasureFailure(string message)
@@ -122,6 +127,15 @@ public class SentenceSimilarityController : MonoBehaviour
         isExecute = false;
     }
 #endregion
+
+    [ContextMenu("Delete All Sentences")]
+    private void DeleteAllSentenceData()
+    {
+        if(saveSystem == null) 
+            saveSystem = new SentenceSaveSystem();
+        
+        saveSystem.DeleteAllData();
+    }
 }
 
 
