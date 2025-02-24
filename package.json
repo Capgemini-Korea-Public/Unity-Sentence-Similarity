@@ -9,16 +9,18 @@
         "unity"
     ],
     "dependencies": {
-        "com.unity.sentis": "2.1.2"
+        "com.unity.sentis": "2.1.2",
+        "com.unity.textmeshpro": "3.0.6",
+        "com.unity.nuget.newtonsoft-json": "3.0.1"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/seungdo1234/Sentence-Similarity-from-Unity"
+        "url": "https://github.com/Capgemini-Korea-Public/Unity-Sentence-Similarity"
     },
     "author": {
-        "name": "Capgemini",
+        "name": "capgemini_korea",
         "email": "twotwo12345678@gmail.com",
-        "url": "https://github.com/seungdo1234"
+        "url": "https://github.com/Capgemini-Korea-Public"
     },
     "samples": [
         {
