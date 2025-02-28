@@ -32,6 +32,7 @@ namespace SentenceSimilarityUnity
         private static void ExecuteModelFromHuggingFaceAPI(string input, Action<float[]> onMeasureSuccess, Action<string> onMeasureFailure, string[] context)
         {
             HuggingFaceAPI.SentenceSimilarity(input, onMeasureSuccess, onMeasureFailure, context);
+      
         }
 
   #endregion
