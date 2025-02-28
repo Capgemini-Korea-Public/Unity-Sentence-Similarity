@@ -21,7 +21,9 @@ Welcome to **Sentence Similarity from Unity** – a powerful Unity module that s
 
 Follow the detailed guide to set up the HuggingFace API **`(complete up to Step 3)`**
 - **[HuggingFace API Installation Tutorial](https://thomassimonini.substack.com/p/building-a-smart-robot-ai-using-hugging)**
-
+```csharp
+https://github.com/huggingface/unity-api
+```
 ### 2. Unity Sentence Similarity Module Installation
 ![Package Manager](https://github.com/user-attachments/assets/ea7df365-e492-4732-8934-eba837176f73)
 
